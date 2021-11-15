@@ -8,6 +8,7 @@ import warnings
 import numpy as np
 from PIL import Image
 from PIL import ImageFile
+import h5py
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -38,9 +39,16 @@ class ImageFolder(Dataset):
     def __getitem__(self, index):
 
         img_path = self.files[index % len(self.files)]
-        img = np.array(
-            Image.open(img_path).convert('RGB'),
-            dtype=np.uint8)
+        #img = np.array(
+            #Image.open(img_path).convert('RGB'),
+            #dtype=np.uint8)
+        f = h5py.File(img_path, 'r')
+        rgb = np.array(f['rgb'])
+        rgb = np.transpose(rgb, (1, 2, 0))
+        #img = rgb
+        depth = np.array(f['depth'])
+        depth = np.expand_dims(depth, axis=2)
+        img = np.concatenate((rgb, depth), axis=2)
 
         # Label Placeholder
         boxes = np.zeros((1, 5))
@@ -87,7 +95,14 @@ class ListDataset(Dataset):
 
             img_path = self.img_files[index % len(self.img_files)].rstrip()
 
-            img = np.array(Image.open(img_path).convert('RGB'), dtype=np.uint8)
+            #img = np.array(Image.open(img_path).convert('RGB'), dtype=np.uint8)
+            f = h5py.File(img_path, 'r')
+            rgb = np.array(f['rgb'])
+            rgb = np.transpose(rgb, (1, 2, 0))
+            #img = rgb
+            depth = np.array(f['depth'])
+            depth = np.expand_dims(depth, axis=2)
+            img = np.concatenate((rgb, depth), axis=2)
         except Exception:
             print(f"Could not read image '{img_path}'.")
             return

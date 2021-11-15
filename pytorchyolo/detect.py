@@ -7,6 +7,7 @@ import argparse
 import tqdm
 import random
 import numpy as np
+import h5py
 
 from PIL import Image
 
@@ -180,7 +181,10 @@ def _draw_and_save_output_image(image_path, detections, img_size, output_path, c
     :type classes: [str]
     """
     # Create plot
-    img = np.array(Image.open(image_path))
+    #img = np.array(Image.open(image_path))
+    h5 = h5py.File(image_path, 'r')
+    img = np.array(h5['rgb'])
+    img = np.transpose(img, (1, 2, 0))
     plt.figure()
     fig, ax = plt.subplots(1)
     ax.imshow(img)
